@@ -96,6 +96,9 @@ app.post('/signUp', (req, res) => {
 // 保存提交
 app.post('/submitEdit', function(req, res) {
   let { records = [], record_id, title } = req.body;
+  if (!records[0].money) {
+    return res.send(error('请先填写记录!'));
+  }
   let { uid } = req.cookies;
   let create_time = Date.now();
   // let sum = records.reduce((a, b) => {
@@ -115,7 +118,7 @@ app.post('/submitEdit', function(req, res) {
     let pattern = record_id ? ({ _id: record_id }) : ({ create_time });
     collection_records.updateOne(pattern, doc, { upsert: true, w: 1 }, (err, r = {}) => {
       if (r.result.ok || r.result.nModified) {
-        res.send(ok({ state: 1, msg: '保存成功!' }));
+        res.send(ok({ _id: r.upsertedId._id }));
       }
       cb();
     });
